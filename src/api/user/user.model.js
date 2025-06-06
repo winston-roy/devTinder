@@ -1,19 +1,21 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
     firstName: {
         type: String,
-        require: true,
-        minLength:4
+        required: true,
+        minLength: 4
     },
     lastName: {
         type: String,
-        require: true
+        required: true
     },
     email: {
         type: String,
-        require: true,
+        required: true,
         trim: true,
         unique: true,
         lowercase: true,
@@ -25,16 +27,16 @@ const userSchema = new mongoose.Schema({
     },
     age: {
         type: Number,
-        require: true,
-        min: [18, 'Must be at least 18, got {VALUE}'],
-        maxlength: 2
+        required: true,
+        min: [18, 'Must be at least 18'],
+        max: [99, 'Maximum allowed age is 99']
     },
     gender: {
         type: String,
-        require: true,
+        required: true,
         enum: {
             values: ['male', 'female', 'other'],
-            message: `enum validator failed for the path {PATH} with value {VALUE}`
+            message: `Gender must be 'male', 'female', or 'other'`
         }
     },
     phoneNumber: {
@@ -47,10 +49,10 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        require: true,
+        required: true,
         validate(value) {
-            if (!validator.isStrongPassword(value, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1, returnScore: false, pointsPerUnique: 1, pointsPerRepeat: 0.5, pointsForContainingLower: 10, pointsForContainingUpper: 10, pointsForContainingNumber: 10, pointsForContainingSymbol: 10 })) {
-                throw new Error("Password need to have { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1}")
+            if (!validator.isStrongPassword(value)) {
+                throw new Error("Password must be strong (8+ chars, 1 upper, 1 lower, 1 number, 1 symbol)")
             }
         }
     },
@@ -66,8 +68,18 @@ const userSchema = new mongoose.Schema({
     skills: {
         type: [String]
     }
-}, { timestamps: true })
+}, { timestamps: true });
 
-const UserModel = mongoose.model("User", userSchema);
+userSchema.methods.getJwtToken = async function () {
+    const token = await jwt.sign({ _id: this._id }, "!@#$1234DevTinder", { expiresIn: "1d" });
+    return token;
+}
 
-module.exports = { UserModel };
+userSchema.methods.validatePassword = async function (passwordInputByUser) {
+    return await bcrypt.compare(passwordInputByUser, this.password);
+}
+
+// ✅ Prevent OverwriteModelError
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+
+module.exports = { User };
