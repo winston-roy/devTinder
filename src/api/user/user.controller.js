@@ -1,127 +1,106 @@
-const bcrypt = require('bcrypt');
-const { User } = require("./user.model")
-const { validateSignUp } = require("../../utils/validation")
+const { User } = require('../auth/auth.model')
+const { ConnectionRequest } = require('../connectionRequest/connectionRequest.model')
+const { respondWithResult, handleError } = require('../../helpers/response')
 
-async function signup(req, res) {
-    try {
-        //Validate
-        validateSignUp(req);
+const USER_SAFE_DATA = "firstName lastName";
 
-        //Encrypt Password
-        const { firstName, lastName, email, password } = req.body;
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const user = new User({
-            firstName,
-            lastName,
-            email,
-            password: hashedPassword
-        });
-
-        await user.save();
-        res.status(200).send({
-            "message": 'User created successfully!!',
-            "data": user
-        })
-    } catch (error) {
-        res.status(400).json({
-            message: error.message,
-        });
-    }
-}
-
-async function login(req, res) {
-    try {
-        const { email, password } = req.body;
-
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            throw new Error("User not exists!!!")
-        }
-
-        const isPasswordValid = await user.validatePassword(password);
-
-        if (isPasswordValid) {
-            const token = await user.getJwtToken();
-            res.cookie("token", token, { expires: new Date(Date.now() + 1 * 3600000) })
-            res.status(200).send({
-                message: "Login Successfull!!!s",
-                data: user
-            })
-        } else {
-            res.status(500).send({
-                message: "Invalid Credentials"
-            })
-        }
-
-    } catch (error) {
-        res.status(400).json({
-            message: error.message,
-        });
-    }
-}
-
-async function profile(req, res) {
+async function requests(req, res) {
     try {
         const loggedInUser = req.user;
 
-        res.status(200).send({
-            'message': 'User Profile!!!',
-            data: loggedInUser
-        })
+        const connectionRequest = await ConnectionRequest.find({
+            toUserId: loggedInUser._id,
+            status: "Interested"
+        }).populate("fromUserId", "firstName lastName")
+            .select("fromUserId toUserId status")
 
+        respondWithResult(res, {
+            'message': `All Connection Requests of ${loggedInUser.firstName}`,
+            'data': connectionRequest
+        });
     } catch (error) {
-        res.status(400).send(error.message)
+        handleError(res, error)
     }
+
 }
 
-async function profileUpdate(req, res) {
+async function connections(req, res) {
     try {
-        const _id = req.params?.userId;
-        const data = req.body;
+        const loggedInUser = req.user;
 
-        const ALLOWED_UPDATES = ["age", "firstName", "lastName", "skills", "phoneNumber"];
+        const connections = await ConnectionRequest.find({
+            '$or': [
+                { fromUserId: loggedInUser._id, status: 'Accepted' },
+                { toUserId: loggedInUser._id, status: 'Accepted' }
+            ]
+        })
+            .populate("fromUserId", USER_SAFE_DATA)
+            .populate("toUserId", USER_SAFE_DATA)
 
-        const invalidKeys = Object.keys(data).filter(k => !ALLOWED_UPDATES.includes(k));
+        const data = connections.map((row) => {
+            if (row.fromUserId._id.toString() === loggedInUser._id.toString())
+                return row.toUserId
 
-        if (invalidKeys.length > 0) {
-            throw new Error(`Update not allowed for key(s): ${invalidKeys.join(', ')}`);
-        }
-
-        if (data?.skills.length > 10) {
-            throw new Error("Skills should not be more than 10")
-        }
-
-        const isUserExists = await User.findById({ _id });
-
-        if (!isUserExists) {
-            throw new Error("User not found")
-        }
-
-        const user = await User.findByIdAndUpdate(_id, data, {
-            returnDocument: "after",
-            runValidators: true
+            return row.fromUserId;
         })
 
-        res.status(200).send({
-            message: "User Updated successfully",
-            data: user
-        })
+        respondWithResult(res, {
+            'message': `All Connection of ${loggedInUser.firstName}`,
+            'data': data
+        });
 
     } catch (error) {
-        res.status(400).json({
-            message: error.message,
+        handleError(res, error)
+    }
+
+}
+
+async function feed(req, res) {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        let limit = parseInt(req.query.limit) || 5;
+        limit = limit > 50 ? 50 : limit;
+
+        const skip = (page - 1) * limit;
+
+        const loggedInUser = req.user;
+
+        const connectionRequest = await ConnectionRequest.find({
+            '$or': [
+                { fromUserId: loggedInUser._id },
+                { toUserId: loggedInUser._id }
+            ]
+        }).select("fromUserId toUserId status");
+
+        const hideFromFeed = new Set();
+
+        connectionRequest.forEach((conn) => {
+            hideFromFeed.add(conn.fromUserId.toString());
+            hideFromFeed.add(conn.toUserId.toString());
+        })
+
+        const users = await User.find({
+            '$and': [
+                { _id: { '$nin': Array.from(hideFromFeed) } },
+                { _id: { '$ne': loggedInUser._id } }
+            ]
+        }).select(USER_SAFE_DATA).skip(skip).limit(limit)
+
+        respondWithResult(res, {
+            'message': `Feed of ${loggedInUser.firstName}`,
+            'data': users
         });
+
+
+    } catch (error) {
+        handleError(res, error)
     }
 }
 
 module.exports = {
     handler: {
-        signup,
-        login,
-        profile,
-        profileUpdate
+        requests,
+        connections,
+        feed
     }
 }
