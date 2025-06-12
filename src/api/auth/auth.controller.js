@@ -148,12 +148,26 @@ async function profileUpdate(req, res) {
     }
 }
 
+async function logout(req, res) {
+    try {
+        res.cookie("token", null, { expires: new Date(Date.now()) })
+        respondWithResult(res, {
+            'message': 'User Logged out successfully',
+        });
+
+    } catch (error) {
+        handleError(res, error)
+    }
+
+}
+
 module.exports = {
     handler: {
         signup,
         login,
         changePassword,
         profile,
-        profileUpdate
+        profileUpdate,
+        logout
     }
 }
