@@ -84,7 +84,7 @@ async function feed(req, res) {
                 { _id: { '$nin': Array.from(hideFromFeed) } },
                 { _id: { '$ne': loggedInUser._id } }
             ]
-        }).select(USER_SAFE_DATA).skip(skip).limit(limit)
+        }).skip(skip).limit(limit)
 
         respondWithResult(res, {
             'message': `Feed of ${loggedInUser.firstName}`,

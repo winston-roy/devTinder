@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
     gender: {
         type: String,
         enum: {
-            values: ['male', 'female', 'other'],
+            values: ['Male', 'Female', 'Other'],
             message: `Gender must be 'male', 'female', or 'other'`
         }
     },
@@ -65,6 +65,9 @@ const userSchema = new mongoose.Schema({
     },
     skills: {
         type: [String]
+    },
+    about: {
+        type:String
     }
 }, { timestamps: true });
 

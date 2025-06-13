@@ -115,7 +115,7 @@ async function profileUpdate(req, res) {
         const _id = req.params?.userId;
         const data = req.body;
 
-        const ALLOWED_UPDATES = ["age", "firstName", "lastName", "skills", "phoneNumber"];
+        const ALLOWED_UPDATES = ["age", "firstName", "lastName", "skills","gender", "phoneNumber", "about","profilePic"];
 
         const invalidKeys = Object.keys(data).filter(k => !ALLOWED_UPDATES.includes(k));
 
