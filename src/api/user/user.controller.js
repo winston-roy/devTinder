@@ -2,7 +2,7 @@ const { User } = require('../auth/auth.model')
 const { ConnectionRequest } = require('../connectionRequest/connectionRequest.model')
 const { respondWithResult, handleError } = require('../../helpers/response')
 
-const USER_SAFE_DATA = "firstName lastName";
+const USER_SAFE_DATA = "firstName lastName profilePic age gender about";
 
 async function requests(req, res) {
     try {
@@ -11,8 +11,8 @@ async function requests(req, res) {
         const connectionRequest = await ConnectionRequest.find({
             toUserId: loggedInUser._id,
             status: "Interested"
-        }).populate("fromUserId", "firstName lastName")
-            .select("fromUserId toUserId status")
+        }).populate("fromUserId", USER_SAFE_DATA)
+            .select(USER_SAFE_DATA)
 
         respondWithResult(res, {
             'message': `All Connection Requests of ${loggedInUser.firstName}`,

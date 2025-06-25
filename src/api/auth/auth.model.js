@@ -56,7 +56,6 @@ const userSchema = new mongoose.Schema({
     },
     profilePic: {
         type: String,
-        default: 'https://ca.slack-edge.com/T01H2UQCP3J-U01GF8VNEAH-b460649f4b2d-48',
         validate(value) {
             if (!validator.isURL(value)) {
                 throw new Error("Enter Valid Profile URL " + value)
@@ -79,6 +78,19 @@ userSchema.methods.getJwtToken = async function () {
 userSchema.methods.validatePassword = async function (passwordInputByUser) {
     return await bcrypt.compare(passwordInputByUser, this.password);
 }
+
+userSchema.pre('save', function (next) {
+    if (!this.profilePic) {
+        if (this.gender === 'male') {
+            this.profilePic = 'https://picsum.photos/id/5/367/267';
+        } else if (this.gender === 'female') {
+            this.profilePic = 'https://ca.slack-edge.com/T01H2UQCP3J-U01GF8VNEAH-b460649f4b2d-48';
+        } else {
+            this.profilePic = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOknYH1ygiy7-BQkLzYRZlJz-6upMwNmFVyxyKhYgS0WKvZXWnAAadzIlOioX6vu7Cxos&usqp=CAU';
+        }
+    }
+    next();
+});
 
 const User = mongoose.model("User", userSchema);
 

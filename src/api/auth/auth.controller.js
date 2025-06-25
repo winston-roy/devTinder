@@ -20,7 +20,9 @@ async function signup(req, res) {
             password: hashedPassword
         });
 
-        await user.save();
+        const savedUser = await user.save();
+        const token = await savedUser.getJwtToken();
+        res.cookie("token", token, { expires: new Date(Date.now() + 1 * 3600000) })
 
         respondWithResult(res, {
             'message': 'Sign Up Successfull',
