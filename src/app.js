@@ -6,7 +6,7 @@ if (SERVER === 'LOCAL')
 if (SERVER === 'PRODUCTION')
     require('dotenv').config();
 
-require('./helpers/cronjob');
+//require('./helpers/cronjob');
 
 const express = require('express');
 const mongoose = require('mongoose');
