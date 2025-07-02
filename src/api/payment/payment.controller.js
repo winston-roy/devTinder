@@ -100,7 +100,7 @@ async function createWebhook(req, res) {
     }
 }
 
-async function premiumVerify(params) {
+async function premiumVerify(req, res) {
     try {
         const user = req.user.toJSON();
         if (user.isPremium) {
