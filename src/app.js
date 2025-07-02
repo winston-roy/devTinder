@@ -1,4 +1,13 @@
-require('dotenv').config();
+const { SERVER } = require('./config/server-constants');
+
+if (SERVER === 'LOCAL')
+    require('dotenv').config({ path: __dirname + '/.env' });
+
+if (SERVER === 'PRODUCTION')
+    require('dotenv').config();
+
+require('./helpers/cronjob');
+
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
@@ -8,7 +17,7 @@ const { loadMiddlerware } = require('./common/middleware');
 const { loadRoutes } = require("./common/routes");
 
 // MongoDB connection URI
-const { connection } = require('./config/connection'); 
+const { connection } = require('./config/connection');
 
 // Utility functions
 async function shutdown() {
