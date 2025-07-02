@@ -1,5 +1,6 @@
 const serverTypes = Object.freeze({
-    LOCAL: 'LOCAL'
+    LOCAL: 'LOCAL',
+    PRODUCTION: 'PRODUCTION'
 })
 
 module.exports = {

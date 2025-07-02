@@ -1,6 +1,7 @@
 const { ConnectionRequest } = require('./connectionRequest.model');
 const { User } = require('../auth/auth.model');
-const { respondWithResult, handleError } = require('../../helpers/response')
+const { respondWithResult, handleError } = require('../../helpers/response');
+const sendEmail = require('../../helpers/sendEmail')
 
 const USER_SAFE_DATA = "firstName lastName";
 
@@ -12,53 +13,107 @@ async function sendConnection(req, res) {
 
         const ALLOWED_STATUS = ['Interested', 'Ignore'];
         if (!ALLOWED_STATUS.includes(status)) {
-            throw new Error("InValid Status Types!!!")
+            throw new Error("Invalid Status Type!");
         }
 
-        //CHhecking User Existence
         const toUser = await User.findById({ _id: toUserId });
+        if (!toUser) throw new Error("User Not Found!");
 
-        if (!toUser) {
-            throw new Error("User Not Found!!!")
-        }
-
-        //Checking Existing Connection
         const existingConnectionRequest = await ConnectionRequest.findOne({
-            '$or': [
+            $or: [
                 { fromUserId, toUserId },
                 { fromUserId: toUserId, toUserId: fromUserId }
             ]
-        })
-
-        if (existingConnectionRequest) {
-            throw new Error("Connection Already Exists!!!")
-        }
+        });
+        if (existingConnectionRequest) throw new Error("Connection Already Exists!");
 
         const connectionRequest = new ConnectionRequest({
             fromUserId,
             toUserId,
             status
-        })
+        });
 
-        const user = await connectionRequest.save();
+        const savedConnection = await connectionRequest.save();
 
-        let response = `${req.user.firstName} has ${status} in ${toUser.firstName}`;
-        if (status == 'Interested')
-            response = `${req.user.firstName} has ${status} in ${toUser.firstName}`
+        // Send email
+        await sendEmail.run(
+            "pashanwinsty1998@gmail.com",
+            "sender@devmatrimony.in",
+            req.user.firstName,
+            toUser.firstName
+        );
 
-        if (status == 'Ignore')
-            response = `${req.user.firstName} has ${status}d  ${toUser.firstName}`
-
-
+        let response = `${req.user.firstName} has ${status}${status === 'Ignore' ? 'd' : ''} ${toUser.firstName}`;
         respondWithResult(res, {
-            'message': response,
-            'data': user
+            message: response,
+            data: savedConnection
         });
 
     } catch (error) {
-        handleError(res, error)
+        console.log('error---', error);
+        handleError(res, error);
     }
-}
+};
+
+// async function sendConnection(req, res) {
+//     try {
+//         const fromUserId = req.user._id;
+//         const toUserId = req.params.toUserId;
+//         const status = req.params.status;
+
+//         const ALLOWED_STATUS = ['Interested', 'Ignore'];
+//         if (!ALLOWED_STATUS.includes(status)) {
+//             throw new Error("InValid Status Types!!!")
+//         }
+
+//         //CHhecking User Existence
+//         const toUser = await User.findById({ _id: toUserId });
+
+//         if (!toUser) {
+//             throw new Error("User Not Found!!!")
+//         }
+
+//         //Checking Existing Connection
+//         const existingConnectionRequest = await ConnectionRequest.findOne({
+//             '$or': [
+//                 { fromUserId, toUserId },
+//                 { fromUserId: toUserId, toUserId: fromUserId }
+//             ]
+//         })
+
+//         if (existingConnectionRequest) {
+//             throw new Error("Connection Already Exists!!!")
+//         }
+
+//         const connectionRequest = new ConnectionRequest({
+//             fromUserId,
+//             toUserId,
+//             status
+//         })
+
+//         const user = await connectionRequest.save();
+
+//         const sendEmailRes = await sendEmail.run();
+//         console.log(sendEmailRes)
+
+//         let response = `${req.user.firstName} has ${status} in ${toUser.firstName}`;
+//         if (status == 'Interested')
+//             response = `${req.user.firstName} has ${status} in ${toUser.firstName}`
+
+//         if (status == 'Ignore')
+//             response = `${req.user.firstName} has ${status}d  ${toUser.firstName}`
+
+
+//         respondWithResult(res, {
+//             'message': response,
+//             'data': user
+//         });
+
+//     } catch (error) {
+//         console.log('error---', error)
+//         handleError(res, error)
+//     }
+// }
 
 async function reviewConnection(req, res) {
     try {
