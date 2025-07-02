@@ -55,66 +55,6 @@ async function sendConnection(req, res) {
     }
 };
 
-// async function sendConnection(req, res) {
-//     try {
-//         const fromUserId = req.user._id;
-//         const toUserId = req.params.toUserId;
-//         const status = req.params.status;
-
-//         const ALLOWED_STATUS = ['Interested', 'Ignore'];
-//         if (!ALLOWED_STATUS.includes(status)) {
-//             throw new Error("InValid Status Types!!!")
-//         }
-
-//         //CHhecking User Existence
-//         const toUser = await User.findById({ _id: toUserId });
-
-//         if (!toUser) {
-//             throw new Error("User Not Found!!!")
-//         }
-
-//         //Checking Existing Connection
-//         const existingConnectionRequest = await ConnectionRequest.findOne({
-//             '$or': [
-//                 { fromUserId, toUserId },
-//                 { fromUserId: toUserId, toUserId: fromUserId }
-//             ]
-//         })
-
-//         if (existingConnectionRequest) {
-//             throw new Error("Connection Already Exists!!!")
-//         }
-
-//         const connectionRequest = new ConnectionRequest({
-//             fromUserId,
-//             toUserId,
-//             status
-//         })
-
-//         const user = await connectionRequest.save();
-
-//         const sendEmailRes = await sendEmail.run();
-//         console.log(sendEmailRes)
-
-//         let response = `${req.user.firstName} has ${status} in ${toUser.firstName}`;
-//         if (status == 'Interested')
-//             response = `${req.user.firstName} has ${status} in ${toUser.firstName}`
-
-//         if (status == 'Ignore')
-//             response = `${req.user.firstName} has ${status}d  ${toUser.firstName}`
-
-
-//         respondWithResult(res, {
-//             'message': response,
-//             'data': user
-//         });
-
-//     } catch (error) {
-//         console.log('error---', error)
-//         handleError(res, error)
-//     }
-// }
-
 async function reviewConnection(req, res) {
     try {
         const loggedInUser = req.user;
