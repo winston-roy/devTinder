@@ -4,5 +4,5 @@ const serverTypes = Object.freeze({
 })
 
 module.exports = {
-    SERVER: serverTypes.LOCAL
+    SERVER: serverTypes.PRODUCTION
 }
