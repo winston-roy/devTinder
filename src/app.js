@@ -1,12 +1,13 @@
 const { SERVER } = require('./config/server-constants');
 
-console.log('server--', SERVER)
-if (SERVER === 'LOCAL')
-    require('dotenv').config({ path: __dirname + '/.env' });
+// console.log('server--', SERVER)
+// if (SERVER === 'LOCAL')
+//     require('dotenv').config({ path: __dirname + '/.env' });
 
-if (SERVER === 'PRODUCTION')
-    require('dotenv').config();
+// if (SERVER === 'PRODUCTION')
+//     require('dotenv').config();
 
+require('dotenv').config();
 //require('./helpers/cronjob');
 
 const express = require('express');
