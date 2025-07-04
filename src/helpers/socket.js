@@ -28,17 +28,17 @@ const initializeSocket = (server) => {
                 const roomId = getSecretRoomId({ userId, targetUserId });
 
                 // ✅ Check if both users are connected (Accepted status)
-                const isConnected = await ConnectionRequest.findOne({
-                    $or: [
-                        { senderId: userId, toUserId: targetUserId, status: "Accepted" },
-                        { senderId: targetUserId, toUserId: userId, status: "Accepted" }
-                    ]
-                });
+                // const isConnected = await ConnectionRequest.findOne({
+                //     $or: [
+                //         { senderId: userId, toUserId: targetUserId, status: "Accepted" },
+                //         { senderId: targetUserId, toUserId: userId, status: "Accepted" }
+                //     ]
+                // });
 
-                if (!isConnected) {
-                    console.log(`Unauthorized chat attempt between ${userId} and ${targetUserId}`);
-                    return;
-                }
+                // if (!isConnected) {
+                //     console.log(`Unauthorized chat attempt between ${userId} and ${targetUserId}`);
+                //     return;
+                // }
 
                 let chat = await Chat.findOne({
                     participants: { '$all': [userId, targetUserId] }
