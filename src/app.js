@@ -1,5 +1,6 @@
 const { SERVER } = require('./config/server-constants');
 
+console.log('SERVER-----', SERVER)
 if (SERVER === 'LOCAL')
     require('dotenv').config({ path: __dirname + '/.env' });
 
