@@ -38,7 +38,7 @@ function startServer() {
         if (err) {
             console.error('Failed to start server:', err);
         } else {
-            console.log(`Server is listening on port ${connection.wsPort}`);
+            console.log(`Server is listening on port ${connection.wsPort} in ${SERVER}`);
         }
     });
 }
