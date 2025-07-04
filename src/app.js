@@ -10,7 +10,9 @@ if (SERVER === 'PRODUCTION')
 
 const express = require('express');
 const mongoose = require('mongoose');
+const http = require('http');
 const app = express();
+const server = http.createServer(app);
 
 // Load internal modules
 const { loadMiddlerware } = require('./common/middleware');
@@ -18,6 +20,7 @@ const { loadRoutes } = require("./common/routes");
 
 // MongoDB connection URI
 const { connection } = require('./config/connection');
+const { initializeSocket } = require('./helpers/socket');
 
 // Utility functions
 async function shutdown() {
@@ -31,7 +34,7 @@ async function shutdown() {
 }
 
 function startServer() {
-    app.listen(connection.wsPort, (err) => {
+    server.listen(connection.wsPort, (err) => {
         if (err) {
             console.error('Failed to start server:', err);
         } else {
@@ -52,6 +55,7 @@ mongoose.connection.once('connected', () => {
     app.set('trust proxy', 1);
 
     loadMiddlerware(app);
+    initializeSocket(server);
     loadRoutes(app);
     startServer();
 });
