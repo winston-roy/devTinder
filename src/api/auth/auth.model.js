@@ -74,6 +74,9 @@ const userSchema = new mongoose.Schema({
     },
     membershipType: {
         type: String
+    },
+    lastSeen: {
+        type: Date
     }
 }, { timestamps: true });
 

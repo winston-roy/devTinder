@@ -10,6 +10,7 @@ const router = express.Router();
 router.post("/signup", handler.signup)
 router.post("/login", handler.login)
 router.get("/profile", authenticateUser, handler.profile)
+router.get("/user/:_id", authenticateUser, handler.userProfile)
 router.post("/changePassword", authenticateUser, handler.changePassword)
 router.patch("/profile/:userId", authenticateUser, handler.profileUpdate)
 router.post("/logout", handler.logout)

@@ -117,7 +117,7 @@ async function profileUpdate(req, res) {
         const _id = req.params?.userId;
         const data = req.body;
 
-        const ALLOWED_UPDATES = ["age", "firstName", "lastName", "skills","gender", "phoneNumber", "about","profilePic"];
+        const ALLOWED_UPDATES = ["age", "firstName", "lastName", "skills", "gender", "phoneNumber", "about", "profilePic"];
 
         const invalidKeys = Object.keys(data).filter(k => !ALLOWED_UPDATES.includes(k));
 
@@ -163,12 +163,28 @@ async function logout(req, res) {
 
 }
 
+async function userProfile(req, res) {
+    try {
+        const { _id } = req.params;
+        const user = await User.findById({ _id });
+
+        respondWithResult(res, {
+            'message': 'User Profile',
+            'data': user
+        });
+
+    } catch (error) {
+        handleError(res, error)
+    }
+}
+
 module.exports = {
     handler: {
         signup,
         login,
         changePassword,
         profile,
+        userProfile,
         profileUpdate,
         logout
     }
