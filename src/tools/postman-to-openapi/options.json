@@ -1,0 +1,13 @@
+{
+    "servers": [
+        {
+            "url": "http://localhost:7777/",
+            "description": "Local"
+        },
+        {
+            "url": "https://devmatrimony.in/",
+            "description": "Production"
+        }
+    ],
+    "outputFormat": "json"
+}

@@ -1,0 +1,212 @@
+{
+    "info": {
+        "_postman_id": "791e4e95-90bf-4031-aff7-bd4a3f91e9db",
+        "name": "DevTinder",
+        "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+        "_exporter_id": "13056405"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Signup",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"firstName\": \"cmaa\",\n    \"lastName\": \"monterio\",\n    \"email\": \"cmaa@gmail.com\",\n    \"password\":\"Cmaa@123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": "http://localhost:7777/api/v2/auth/signup"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"winston@gmail.com\",\n    \"password\":\"Winston@123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": "http://localhost:7777/api/v2/auth/login"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Change Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"newPassword\":\"qwerty@123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": "http://localhost:7777/api/v2/auth/changePassword"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "profile",
+                    "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                    },
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"WINSTON.pashan@gmail.com\",\n    \"password\":\"1234@Winsroy1\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": "http://localhost:7777/api/v2/auth/profile"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"firstName\": \"Winston\",\n    \"lastName\": \"Pashan\",\n    \"age\": 26,\n    \"phoneNumber\":\"7845124578\",\n    \"skills\":[\"MEAN\", \"Nodejs\",\"auth\"]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": "http://localhost:7777/api/v2/auth/profile/684163606b321b7acc7cfc20"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "ConnectionRequest",
+            "item": [
+                {
+                    "name": "SendConnection",
+                    "request": {
+                        "method": "GET",
+                        "header": []
+                    },
+                    "response": []
+                },
+                {
+                    "name": "ReviewConnection",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": "http://localhost:7777/api/v2/request/review/Accepted/684804e38b7556328b62384d"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "User",
+            "item": [
+                {
+                    "name": "All Requests",
+                    "request": {
+                        "method": "GET",
+                        "header": []
+                    },
+                    "response": []
+                },
+                {
+                    "name": "All Connections",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": "http://localhost:7777/api/v2/user/requests/connections"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Feed Connections",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:7777/api/v2/user/requests/feed?page=1&limit=10",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "7777",
+                            "path": [
+                                "api",
+                                "v2",
+                                "user",
+                                "requests",
+                                "feed"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Payment",
+            "item": [
+                {
+                    "name": "create order",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": "http://localhost:7777/api/v2/payment/create"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Chat",
+            "item": [
+                {
+                    "name": "chat/targetUserId",
+                    "request": {
+                        "method": "GET",
+                        "header": []
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}
