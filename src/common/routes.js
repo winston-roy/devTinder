@@ -22,7 +22,7 @@ baseRouter.use("/chat", chatRoutes);
 
 function loadRoutes(app) {
     app.use(`${ROUTE_BASE_PATH}`, baseRouter);
-    app.use('https://devmatrimony.in/api/api-test-page', //`${ROUTE_BASE_PATH}/api-test-page`,
+    app.use(`${ROUTE_BASE_PATH}/api-test-page`,
         authenticateUser,
         swaggerUi.serve,
         (req, res, next) => {
