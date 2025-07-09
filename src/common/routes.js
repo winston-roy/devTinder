@@ -23,7 +23,7 @@ baseRouter.use("/chat", chatRoutes);
 function loadRoutes(app) {
     app.use(`${ROUTE_BASE_PATH}`, baseRouter);
     app.use(`${ROUTE_BASE_PATH}/api-test-page`,
-        authenticateUser,
+        //authenticateUser,
         swaggerUi.serve,
         (req, res, next) => {
             updateSwaggerSpecAndUiOptions(req, res);
