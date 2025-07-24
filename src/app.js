@@ -1,43 +1,73 @@
+const { SERVER } = require('./config/server-constants');
+
+console.log('SERVER-----', SERVER)
+if (SERVER === 'LOCAL')
+    require('dotenv').config({ path: __dirname + '/.env' });
+
+if (SERVER === 'PRODUCTION')
+    require('dotenv').config();
+
+//require('./helpers/cronjob');
+
 const express = require('express');
+const mongoose = require('mongoose');
+const http = require('http');
 const app = express();
+const server = http.createServer(app);
 
-const { connectDB } = require('./config/database');
-const { UserModel } = require("./models/user")
+// Load internal modules
+const { loadMiddlerware } = require('./common/middleware');
+const { loadRoutes } = require("./common/routes");
 
+// MongoDB connection URI
+const { connection } = require('./config/connection');
+const { initializeSocket } = require('./helpers/socket');
 
-app.post("/user/signup", async (req, res) => {
-    try {
-        let userData = {
-            firstName: "Winston",
-            lastName: "Pashan",
-            email: "winston.pashan@gmail.com",
-            age: 26,
-            gender: "male"
-        }
-        const user = new UserModel(userData);
-        await user.save();
-        res.send("User created successfully!!")
-    } catch (err) {
-        res.status(500).send("Error while signup!!!")
+// Utility functions
+async function shutdown() {
+    const readyState = mongoose.connection.readyState;
+    if (readyState === 1 || readyState === 2 || readyState === 3) {
+        await mongoose.connection.close();
+        console.log('MongoDB connection closed');
     }
+    console.log('Exiting node process');
+    process.exit(0);
+}
 
+function startServer() {
+    server.listen(connection.wsPort, (err) => {
+        if (err) {
+            console.error('Failed to start server:', err);
+        } else {
+            console.log(`Server is listening on port ${connection.wsPort} in ${SERVER}`);
+        }
+    });
+}
 
-})
+// Setup MongoDB events
+mongoose.connection.on('error', (err) => {
+    console.error(`MongoDB connection error: ${err}`);
+    shutdown();
+});
 
+mongoose.connection.once('connected', () => {
+    console.log('Connected to MongoDB');
+    app.set('defaultConnection', mongoose.connection);
+    app.set('trust proxy', 1);
 
-connectDB()
-    .then(() => {
-        console.log('database connection successfull')
-        app.listen(4200, (err) => {
-            if (err) {
-                console.error('Failed to start server:', err);
-            } else {
-                console.log('Server is listening on port 4200');
-            }
-        });
-    })
+    loadMiddlerware(app);
+    initializeSocket(server);
+    loadRoutes(app);
+    startServer();
+});
+
+// Start the app by connecting to MongoDB
+mongoose.connect(connection.mongoUri)
     .catch((err) => {
-        console.log('Error in DB Connection', err)
-    })
+        console.error('Error in DB Connection:', err);
+        shutdown();
+    });
 
-
+// Handle termination signals
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

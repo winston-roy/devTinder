@@ -1,0 +1,107 @@
+const mongoose = require('mongoose');
+const validator = require('validator');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
+const userSchema = new mongoose.Schema({
+    firstName: {
+        type: String,
+        required: true,
+        minLength: 4
+    },
+    lastName: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true,
+        trim: true,
+        unique: true,
+        lowercase: true,
+        validate(value) {
+            if (!validator.isEmail(value)) {
+                throw new Error("Enter Correct Email ID " + value)
+            }
+        }
+    },
+    age: {
+        type: Number,
+        min: [18, 'Must be at least 18'],
+        max: [99, 'Maximum allowed age is 99']
+    },
+    gender: {
+        type: String,
+        enum: {
+            values: ['Male', 'Female', 'Other'],
+            message: `Gender must be 'male', 'female', or 'other'`
+        }
+    },
+    phoneNumber: {
+        type: String,
+        validate(value) {
+            if (!validator.isMobilePhone(value)) {
+                throw new Error("Enter Valid Phone Number " + value)
+            }
+        }
+    },
+    password: {
+        type: String,
+        required: true,
+        validate(value) {
+            if (!validator.isStrongPassword(value)) {
+                throw new Error("Password must be strong (8+ chars, 1 upper, 1 lower, 1 number, 1 symbol)")
+            }
+        }
+    },
+    profilePic: {
+        type: String,
+        validate(value) {
+            if (!validator.isURL(value)) {
+                throw new Error("Enter Valid Profile URL " + value)
+            }
+        }
+    },
+    skills: {
+        type: [String]
+    },
+    about: {
+        type: String
+    },
+    isPremium: {
+        type: Boolean,
+        default: false
+    },
+    membershipType: {
+        type: String
+    },
+    lastSeen: {
+        type: Date
+    }
+}, { timestamps: true });
+
+userSchema.methods.getJwtToken = async function () {
+    const token = await jwt.sign({ _id: this._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    return token;
+}
+
+userSchema.methods.validatePassword = async function (passwordInputByUser) {
+    return await bcrypt.compare(passwordInputByUser, this.password);
+}
+
+userSchema.pre('save', function (next) {
+    if (!this.profilePic) {
+        if (this.gender === 'male') {
+            this.profilePic = 'https://picsum.photos/id/5/367/267';
+        } else if (this.gender === 'female') {
+            this.profilePic = 'https://ca.slack-edge.com/T01H2UQCP3J-U01GF8VNEAH-b460649f4b2d-48';
+        } else {
+            this.profilePic = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOknYH1ygiy7-BQkLzYRZlJz-6upMwNmFVyxyKhYgS0WKvZXWnAAadzIlOioX6vu7Cxos&usqp=CAU';
+        }
+    }
+    next();
+});
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = { User };
